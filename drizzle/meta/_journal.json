@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1776020118211,
+      "tag": "0000_sparkling_the_hood",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776022052347,
+      "tag": "0001_youthful_invaders",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776028045829,
+      "tag": "0002_late_calypso",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776030000000,
+      "tag": "0003_add_admin_to_allowed_emails",
+      "breakpoints": true
+    }
+  ]
+}

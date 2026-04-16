@@ -1,4 +1,6 @@
-import { postRouter } from "@/server/api/routers/post";
+import { allowedEmailsRouter } from "@/server/api/routers/allowed-emails";
+import { gamesRouter } from "@/server/api/routers/games";
+import { chatRouter } from "@/server/api/routers/chat";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 /**
@@ -7,7 +9,9 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
+  allowedEmails: allowedEmailsRouter,
+  games: gamesRouter,
+  chat: chatRouter,
 });
 
 // export type definition of API

@@ -4,3 +4,94 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+
+/* Custom animations for checkers game */
+@keyframes ring-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.ring-pulse {
+  animation: ring-pulse 1.5s ease-in-out infinite;
+}
+
+/* Smooth board interactions */
+.checkers-piece {
+  will-change: transform;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.checkers-square {
+  will-change: background-color;
+  transition: all 0.4s ease-in-out;
+}
+
+/* Intro page animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+/* Enhanced mobile touch interactions */
+@media (max-width: 768px) {
+  /* Ensure proper touch targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smoother scroll on mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
+/* Custom drag styles */
+.cursor-grabbing {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
+
+.cursor-grab {
+  cursor: grab;
+  cursor: -webkit-grab;
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .hover\:scale-105:hover {
+    transform: none;
+  }
+  
+  .hover\:scale-110:hover {
+    transform: none;
+  }
+  
+  /* Add active states for touch devices */
+  .hover\:scale-105:active {
+    transform: scale(1.05);
+  }
+  
+  .hover\:scale-110:active {
+    transform: scale(1.1);
+  }
+}

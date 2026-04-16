@@ -1,14 +1,16 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-
+import EmailProvider from "next-auth/providers/email";
 import { db } from "@/server/db";
 import {
   accounts,
   sessions,
   users,
   verificationTokens,
+  allowedEmails,
 } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
+import { env } from "@/env";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -38,15 +40,25 @@ declare module "next-auth" {
  */
 export const authConfig = {
   providers: [
-    DiscordProvider,
+    // Only include email provider if SMTP is configured
+    ...(env.SMTP_HOST && env.SMTP_PORT && env.SMTP_USER && env.SMTP_PASSWORD && env.EMAIL_FROM
+      ? [EmailProvider({
+          server: {
+            host: env.SMTP_HOST,
+            port: Number(env.SMTP_PORT),
+            auth: {
+              user: env.SMTP_USER,
+              pass: env.SMTP_PASSWORD,
+            },
+          },
+          from: env.EMAIL_FROM,
+          maxAge: 24 * 60 * 60, // 24 hours
+        })]
+      : []
+    ),
     /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
+     * For development/testing, you can also add Discord provider:
+     * DiscordProvider,
      */
   ],
   adapter: DrizzleAdapter(db, {
@@ -56,6 +68,18 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
+    async signIn({ user, email: _email }) {
+      if (!user.email) return false;
+      
+      // Check if email is in the allowed emails list
+      const allowedEmail = await db
+        .select()
+        .from(allowedEmails)
+        .where(eq(allowedEmails.email, user.email))
+        .limit(1);
+      
+      return allowedEmail.length > 0;
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {
@@ -63,5 +87,9 @@ export const authConfig = {
         id: user.id,
       },
     }),
+  },
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
   },
 } satisfies NextAuthConfig;
