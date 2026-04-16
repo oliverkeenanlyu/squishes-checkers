@@ -1,4 +1,4 @@
-// Checkers AI Logic
+// Checkers Hank Logic
 
 import {
   type GameState,
@@ -15,17 +15,17 @@ export type AIDifficulty = 'easy' | 'medium' | 'hard';
 //   score: number;
 // }
 
-// Main AI function - returns the best move for the current player
+// Main Hank function - returns the best move for the current player
 export function getAIMove(gameState: GameState, difficulty: AIDifficulty = 'medium'): Move | null {
   // Validate game state
   if (!gameState?.status || gameState.status !== 'active') {
-    console.warn('AI: Invalid game state - not active');
+    console.warn('Hank: Invalid game state - not active');
     return null;
   }
 
   // Additional board validation
   if (!gameState.board?.length || gameState.board.length !== 8) {
-    console.warn('AI: Invalid board structure');
+    console.warn('Hank: Invalid board structure');
     return null;
   }
 
@@ -35,15 +35,15 @@ export function getAIMove(gameState: GameState, difficulty: AIDifficulty = 'medi
   ).filter(Boolean);
   
   if (currentPlayerPieces.length === 0) {
-    console.warn(`AI: No pieces found for current player: ${gameState.currentPlayer}`);
+    console.warn(`Hank: No pieces found for current player: ${gameState.currentPlayer}`);
     return null;
   }
 
-  console.log(`AI (${gameState.currentPlayer}): Found ${currentPlayerPieces.length} pieces on board`);
+  console.log(`Hank (${gameState.currentPlayer}): Found ${currentPlayerPieces.length} pieces on board`);
 
   const legalMoves = getAllLegalMoves(gameState);
   if (legalMoves.length === 0) {
-    console.warn('AI: No legal moves available');
+    console.warn('Hank: No legal moves available');
     return null;
   }
 
@@ -53,7 +53,7 @@ export function getAIMove(gameState: GameState, difficulty: AIDifficulty = 'medi
     const isValidPiece = piece?.player === gameState.currentPlayer;
     
     if (!isValidPiece) {
-      console.warn('AI: Found invalid move with no piece at source:', {
+      console.warn('Hank: Found invalid move with no piece at source:', {
         move,
         piece,
         currentPlayer: gameState.currentPlayer
@@ -64,7 +64,7 @@ export function getAIMove(gameState: GameState, difficulty: AIDifficulty = 'medi
   });
 
   if (validMoves.length === 0) {
-    console.warn('AI: No valid moves after filtering');
+    console.warn('Hank: No valid moves after filtering');
     return null;
   }
 
@@ -88,7 +88,7 @@ export function getAIMove(gameState: GameState, difficulty: AIDifficulty = 'medi
   if (selectedMove) {
     const piece = gameState.board[selectedMove.from.row]?.[selectedMove.from.col];
     if (!piece?.player || piece.player !== gameState.currentPlayer) {
-      console.error('AI: Generated invalid move - no piece at source position', {
+      console.error('Hank: Generated invalid move - no piece at source position', {
         move: selectedMove,
         piece,
         currentPlayer: gameState.currentPlayer,
@@ -101,13 +101,13 @@ export function getAIMove(gameState: GameState, difficulty: AIDifficulty = 'medi
   return selectedMove;
 }
 
-// Easy AI - Random moves
+// Easy Hank - Random moves
 function getRandomMove(legalMoves: Move[]): Move {
   const randomIndex = Math.floor(Math.random() * legalMoves.length);
   return legalMoves[randomIndex]!;
 }
 
-// Medium AI - Basic strategy
+// Medium Hank - Basic strategy
 function getMediumMove(gameState: GameState, legalMoves: Move[]): Move {
   const scoredMoves = legalMoves.map(move => ({
     move,
@@ -123,7 +123,7 @@ function getMediumMove(gameState: GameState, legalMoves: Move[]): Move {
   return topMoves[randomIndex]!.move;
 }
 
-// Hard AI - Minimax with limited depth
+// Hard Hank - Minimax with limited depth
 function getHardMove(gameState: GameState, legalMoves: Move[]): Move {
   const depth = 3; // Look ahead 3 moves
   let bestMove = legalMoves[0]!;
@@ -277,14 +277,14 @@ function getPositionValue(row: number, col: number, player: Player): number {
   return score;
 }
 
-// Check if it's time for AI to move
+// Check if it's time for Hank to move
 export function shouldAIMakeMove(gameState: GameState, aiPlayer: Player): boolean {
   return gameState.status === 'active' && 
          gameState.currentPlayer === aiPlayer && 
          !gameState.mustContinueCapture; // Let human complete multi-jumps
 }
 
-// Simulate AI thinking time (for UX)
+// Simulate Hank thinking time (for UX)
 export async function makeAIMoveWithDelay(
   gameState: GameState, 
   difficulty: AIDifficulty = 'medium',

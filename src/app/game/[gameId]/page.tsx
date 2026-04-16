@@ -40,7 +40,7 @@ export default function GamePage() {
         const gameData = _query.state.data;
         if (!gameData) return false;
         
-        // No polling for AI games (to prevent race conditions)
+        // No polling for Hank games (to prevent race conditions)
         if (gameData.gameMode === 'single_player_ai') return false;
         
         // Fast polling for multiplayer games in progress
@@ -68,7 +68,7 @@ export default function GamePage() {
         // Use same logic as game data for consistency
         if (!data) return false;
         
-        // No polling for AI games
+        // No polling for Hank games
         if (data.gameMode === 'single_player_ai') return false;
         
         // Fast polling for active multiplayer games
@@ -92,34 +92,34 @@ export default function GamePage() {
 
   const makeAIMoveMutation = api.games.makeAIMove.useMutation({
     onSuccess: () => {
-      console.log("✅ AI move succeeded, resetting state");
+      console.log("✅ Hank move succeeded, resetting state");
       aiMoveInProgress.current = false;
       aiFailureCount.current = 0; // Reset failure count on success
       setIsWaitingForAI(false);
       // Delay refetch to prevent race conditions
       setTimeout(() => {
-        console.log("🔄 Refetching game state after AI move...");
+        console.log("🔄 Refetching game state after Hank move...");
         void refetch();
       }, 300);
     },
     onError: (error) => {
-      console.error("❌ AI move failed:", error);
+      console.error("❌ Hank move failed:", error);
       aiMoveInProgress.current = false;
       setIsWaitingForAI(false);
       
       // Increment failure count
       aiFailureCount.current += 1;
-      console.warn(`🚨 AI failure count: ${aiFailureCount.current}/${maxAIFailures}`);
+      console.warn(`🚨 Hank failure count: ${aiFailureCount.current}/${maxAIFailures}`);
       
       if (aiFailureCount.current >= maxAIFailures) {
-        console.error(`🛑 AI failed ${maxAIFailures} times, stopping attempts`);
+        console.error(`🛑 Hank failed ${maxAIFailures} times, stopping attempts`);
         showToast(`Hank encountered an error and can't move. Try refreshing the page.`, "error");
         return;
       }
       
       // Try to refetch anyway in case the state is inconsistent
       setTimeout(() => {
-        console.log("🔄 Refetching game state after AI failure...");
+        console.log("🔄 Refetching game state after Hank failure...");
         void refetch();
       }, 1000);
     },
@@ -178,7 +178,7 @@ export default function GamePage() {
       
       setGameState(data.gameState);
       
-      // For single-player games, determine if current turn belongs to AI
+      // For single-player games, determine if current turn belongs to Hank
       if (data.gameMode === 'single_player_ai') {
         const aiPlayer = data.aiPlayer as 'red' | 'black';
         const humanPlayer = aiPlayer === 'red' ? 'black' : 'red';
@@ -189,18 +189,18 @@ export default function GamePage() {
         const oldIsAITurn = isAITurn;
         
         setIsAITurn(newIsAITurn);
-        setPlayerColor(humanPlayer); // Human player gets opposite color of AI
+        setPlayerColor(humanPlayer); // Human player gets opposite color of Hank
         
-        // Reset AI waiting state if it's no longer AI's turn
+        // Reset Hank waiting state if it's no longer Hank's turn
         if (!newIsAITurn && (isWaitingForAI || aiMoveInProgress.current)) {
-          console.log("🔄 No longer AI's turn, resetting waiting state");
+          console.log("🔄 No longer Hank's turn, resetting waiting state");
           aiMoveInProgress.current = false;
           setIsWaitingForAI(false);
         }
         
-        // If AI turn state changed to true, ensure we're not stuck waiting
+        // If Hank turn state changed to true, ensure we're not stuck waiting
         if (newIsAITurn && !oldIsAITurn && (isWaitingForAI || aiMoveInProgress.current)) {
-          console.log("🔄 AI turn started but we're already waiting - resetting wait state");
+          console.log("🔄 Hank turn started but we're already waiting - resetting wait state");
           aiMoveInProgress.current = false;
           setIsWaitingForAI(false);
         }
@@ -219,7 +219,7 @@ export default function GamePage() {
     }
   }, [data, moves]);
 
-  // Handle AI moves - with better safeguards against race conditions
+  // Handle Hank moves - with better safeguards against race conditions
   useEffect(() => {
     // Only use simple values in dependencies to avoid constant re-renders
     const currentPlayer = gameState?.currentPlayer;
@@ -231,7 +231,7 @@ export default function GamePage() {
       const gameActive = gameStatus === 'in_progress';
       const shouldBeAITurn = gameActive && currentPlayer === aiPlayer;
       
-      console.log("🤖 AI Turn Check:", {
+      console.log("🤖 Hank Turn Check:", {
         aiPlayer,
         currentPlayer,
         gameActive,
@@ -241,7 +241,7 @@ export default function GamePage() {
         isPending: makeAIMoveMutation.isPending
       });
       
-      // Check if we should make an AI move
+      // Check if we should make an Hank move
       const shouldMakeAIMove = shouldBeAITurn && 
                              !aiMoveInProgress.current && 
                              !makeAIMoveMutation.isPending && 
@@ -250,7 +250,7 @@ export default function GamePage() {
                              aiFailureCount.current < maxAIFailures; // Circuit breaker
       
       if (shouldMakeAIMove) {
-        console.log("✅ Starting AI move...");
+        console.log("✅ Starting Hank move...");
         
         // Set the ref to prevent concurrent moves
         aiMoveInProgress.current = true;
@@ -258,59 +258,59 @@ export default function GamePage() {
         
         const makeAIMove = async () => {
           try {
-            // Short delay for natural AI thinking
+            // Short delay for natural Hank thinking
             await new Promise(resolve => setTimeout(resolve, 1000));
             
             // Final check before making the move
             if (!aiMoveInProgress.current) {
-              console.log("❌ Aborting AI move - no longer in progress");
+              console.log("❌ Aborting Hank move - no longer in progress");
               return;
             }
             
             console.log("🚀 Calling makeAIMoveMutation...");
             await makeAIMoveMutation.mutateAsync({ gameId });
-            console.log("✅ AI move completed successfully");
+            console.log("✅ Hank move completed successfully");
           } catch (error) {
-            console.error("❌ Failed to make AI move:", error);
+            console.error("❌ Failed to make Hank move:", error);
             // Error handling is now in the mutation's onError
           }
         };
 
         void makeAIMove();
       } else if (shouldBeAITurn && aiFailureCount.current >= maxAIFailures) {
-        console.warn("🛑 AI disabled due to too many failures");
+        console.warn("🛑 Hank disabled due to too many failures");
       }
       
-      // Reset AI state if it's no longer AI's turn
+      // Reset Hank state if it's no longer Hank's turn
       if (!shouldBeAITurn && (aiMoveInProgress.current || isWaitingForAI)) {
-        console.log("🔄 No longer AI's turn, resetting all AI state");
+        console.log("🔄 No longer Hank's turn, resetting all Hank state");
         aiMoveInProgress.current = false;
         setIsWaitingForAI(false);
-        // Reset failure count when it's no longer AI's turn
+        // Reset failure count when it's no longer Hank's turn
         aiFailureCount.current = 0;
       }
     }
   }, [isAITurn, gameStarted, gameId, makeAIMoveMutation.isPending]);
 
-  // Fallback polling for AI turns only - to detect if AI moved outside our control
+  // Fallback polling for Hank turns only - to detect if Hank moved outside our control
   useEffect(() => {
     if (isAITurn && 
         (isWaitingForAI || aiMoveInProgress.current) && 
-        aiFailureCount.current < maxAIFailures) { // Don't poll if AI is disabled
+        aiFailureCount.current < maxAIFailures) { // Don't poll if Hank is disabled
       
-      console.log("🔄 Starting fallback polling for AI turn...");
+      console.log("🔄 Starting fallback polling for Hank turn...");
       const pollInterval = setInterval(() => {
-        console.log("🔄 Fallback poll: checking if AI moved...");
+        console.log("🔄 Fallback poll: checking if Hank moved...");
         void refetch();
       }, 4000); // Increased interval to reduce spam
 
       // Clear polling after 20 seconds max (reduced from 30)
       const timeout = setTimeout(() => {
-        console.warn("⏰ AI move timeout - clearing polling and resetting state");
+        console.warn("⏰ Hank move timeout - clearing polling and resetting state");
         clearInterval(pollInterval);
         aiMoveInProgress.current = false;
         setIsWaitingForAI(false);
-        // Don't increment failure count on timeout, as it might not be AI's fault
+        // Don't increment failure count on timeout, as it might not be Hank's fault
       }, 20000);
 
       return () => {
@@ -528,7 +528,7 @@ export default function GamePage() {
     capturedPieces: lastMoveData.move.capturedPieces ? JSON.parse(lastMoveData.move.capturedPieces) as Array<{row: number, col: number}> : [],
     type: lastMoveData.move.moveType as 'normal' | 'capture' | 'king_promotion',
     isOpponentMove: data?.gameMode === 'single_player_ai' ? 
-      lastMoveData.player?.id !== data.currentUserId : // AI move in single player (AI has different user ID)
+      lastMoveData.player?.id !== data.currentUserId : // Hank move in single player (Hank has different user ID)
       lastMoveData.player?.id !== data?.currentUserId   // Opponent move in multiplayer
   } : null;
   
@@ -572,12 +572,12 @@ export default function GamePage() {
                 Share Game Link
               </button>
             )}
-            {/* Debug buttons for AI games */}
+            {/* Debug buttons for Hank games */}
             {data.gameMode === 'single_player_ai' && process.env.NODE_ENV === 'development' && (
               <>
                 {/* <button
                   onClick={() => {
-                    console.log("🔧 Force AI Move clicked");
+                    console.log("🔧 Force Hank Move clicked");
                     console.log("🔧 Current state:", {
                       isAITurn,
                       isWaitingForAI,
@@ -589,22 +589,22 @@ export default function GamePage() {
                     });
                     
                     if (!aiMoveInProgress.current && !makeAIMoveMutation.isPending) {
-                      console.log("🔧 Forcing AI move...");
+                      console.log("🔧 Forcing Hank move...");
                       aiMoveInProgress.current = true;
                       setIsWaitingForAI(true);
                       makeAIMoveMutation.mutate({ gameId });
                     } else {
-                      console.log("🔧 Cannot force AI move - already in progress");
+                      console.log("🔧 Cannot force Hank move - already in progress");
                     }
                   }}
                   disabled={makeAIMoveMutation.isPending || aiMoveInProgress.current}
                   className="px-3 py-1 bg-orange-600 text-white rounded text-xs"
                 >
-                  Force AI Move
+                  Force Hank Move
                 </button>
                 <button
                   onClick={() => {
-                    console.log("🔧 Reset AI state clicked");
+                    console.log("🔧 Reset Hank state clicked");
                     console.log("🔧 Previous state:", {
                       isAITurn,
                       isWaitingForAI,
@@ -617,11 +617,11 @@ export default function GamePage() {
                     setIsWaitingForAI(false);
                     // Also trigger a refetch to refresh game state
                     refetch();
-                    console.log("🔧 AI state reset and refetch triggered");
+                    console.log("🔧 Hank state reset and refetch triggered");
                   }}
                   className="px-3 py-1 bg-yellow-600 text-white rounded text-xs"
                 >
-                  Reset AI State
+                  Reset Hank State
                 </button> */}
                 {/* <button
                   onClick={() => {
@@ -635,7 +635,7 @@ export default function GamePage() {
                 </button> */}
                 {aiFailureCount.current > 0 && (
                   <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
-                    AI Fails: {aiFailureCount.current}/{maxAIFailures}
+                    Hank Fails: {aiFailureCount.current}/{maxAIFailures}
                   </span>
                 )}
               </>
@@ -754,7 +754,7 @@ export default function GamePage() {
                   Hank encountered an error
                 </h3>
                 <p className="text-sm text-red-700 mt-1">
-                  Hank can&apos;t make a move due to a technical issue. Try using the &quot;Reset AI State&quot; button or refresh the page.
+                  Hank can&apos;t make a move due to a technical issue. Try using the &quot;Reset Hank State&quot; button or refresh the page.
                 </p>
               </div>
             </div>

@@ -47,7 +47,7 @@ export const gamesRouter = createTRPCRouter({
       return newGame;
     }),
 
-  // Create a new single-player game against AI
+  // Create a new single-player game against Hank
   createSinglePlayer: protectedProcedure
     .input(z.object({
       difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
@@ -57,14 +57,14 @@ export const gamesRouter = createTRPCRouter({
       const initialGameState = createInitialGameState();
       const aiPlayer = input.playerColor === 'red' ? 'black' : 'red';
       
-      // Set the current turn to the human player if they chose red, or null if AI goes first
+      // Set the current turn to the human player if they chose red, or null if Hank goes first
       const currentTurn = input.playerColor === 'red' ? ctx.session.user.id : null;
       
       const [newGame] = await ctx.db
         .insert(games)
         .values({
           player1Id: ctx.session.user.id,
-          player2Id: null,  // No human player 2 for AI games
+          player2Id: null,  // No human player 2 for Hank games
           gameMode: "single_player_ai",
           aiDifficulty: input.difficulty,
           aiPlayer,
@@ -252,7 +252,7 @@ export const gamesRouter = createTRPCRouter({
       };
     }),
 
-  // Make AI move (for single player games)
+  // Make Hank move (for single player games)
   makeAIMove: protectedProcedure
     .input(z.object({ gameId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -260,7 +260,7 @@ export const gamesRouter = createTRPCRouter({
       
       // Use a transaction to prevent race conditions
       return await ctx.db.transaction(async (tx) => {
-        console.log("🤖 Starting transaction for AI move");
+        console.log("🤖 Starting transaction for Hank move");
         
         const game = await tx
           .select()
@@ -301,7 +301,7 @@ export const gamesRouter = createTRPCRouter({
           throw new TRPCError({ code: "FORBIDDEN", message: "Not your game" });
         }
 
-        // Check if it's AI's turn
+        // Check if it's Hank's turn
         const gameState = deserializeGameState(game[0].boardState);
         const aiPlayer = game[0].aiPlayer as 'red' | 'black';
         
@@ -314,11 +314,11 @@ export const gamesRouter = createTRPCRouter({
         });
         
         if (gameState.currentPlayer !== aiPlayer) {
-          console.error("🤖 Not AI's turn:", {
+          console.error("🤖 Not Hank's turn:", {
             currentPlayer: gameState.currentPlayer,
             aiPlayer
           });
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Not AI's turn" });
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Not Hank's turn" });
         }
 
         // Validate game state integrity
@@ -327,8 +327,8 @@ export const gamesRouter = createTRPCRouter({
           throw new TRPCError({ code: "BAD_REQUEST", message: "Game is not active" });
         }
 
-        // Import AI module dynamically to avoid server-side issues
-        console.log("🤖 Getting AI move...");
+        // Import Hank module dynamically to avoid server-side issues
+        console.log("🤖 Getting Hank move...");
         console.log("🤖 Current board state:", {
           pieces: gameState.board.flatMap((row, r) => 
             row.map((piece, c) => piece ? `${piece.player}-${piece.type}@${r},${c}` : null)
@@ -342,7 +342,7 @@ export const gamesRouter = createTRPCRouter({
         const { getAIMove } = await import("@/lib/checkers-ai");
         const { getAllLegalMoves } = await import("@/lib/checkers-logic");
         
-        // Check legal moves available for AI
+        // Check legal moves available for Hank
         const allLegalMoves = getAllLegalMoves(gameState);
         const aiLegalMoves = allLegalMoves.filter(move => {
           const piece = gameState.board[move.from.row]?.[move.from.col];
@@ -360,56 +360,56 @@ export const gamesRouter = createTRPCRouter({
         });
         
         if (aiLegalMoves.length === 0) {
-          console.error("🤖 No legal moves available for AI player:", aiPlayer);
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI has no legal moves available" });
+          console.error("🤖 No legal moves available for Hank player:", aiPlayer);
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Hank has no legal moves available" });
         }
         
         const aiMove = getAIMove(gameState, game[0].aiDifficulty as 'easy' | 'medium' | 'hard');
 
         if (!aiMove) {
-          console.error('🤖 AI could not find a move. Game state:', {
+          console.error('🤖 Hank could not find a move. Game state:', {
             currentPlayer: gameState.currentPlayer,
             aiPlayer,
             status: gameState.status,
             boardHasPieces: gameState.board.some(row => row.some(cell => cell?.player === aiPlayer))
           });
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI could not find a move" });
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Hank could not find a move" });
         }
 
-        console.log("🤖 AI found move:", aiMove);
+        console.log("🤖 Hank found move:", aiMove);
 
         // Double-check that the piece still exists at the source position
         const piece = gameState.board[aiMove.from.row]?.[aiMove.from.col];
         if (!piece?.player || piece.player !== aiPlayer) {
-          console.error('🤖 Invalid AI move - no piece at source:', {
+          console.error('🤖 Invalid Hank move - no piece at source:', {
             move: aiMove,
             piece,
             currentPlayer: gameState.currentPlayer,
             aiPlayer
           });
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI generated move for non-existent piece" });
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Hank generated move for non-existent piece" });
         }
 
-        // Validate the AI move before applying it
+        // Validate the Hank move before applying it
         if (!isValidMove(gameState, aiMove)) {
-          console.error('🤖 Invalid AI move generated:', {
+          console.error('🤖 Invalid Hank move generated:', {
             move: aiMove,
             gameState: {
               currentPlayer: gameState.currentPlayer,
               mustContinueCapture: gameState.mustContinueCapture
             }
           });
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "AI generated invalid move" });
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Hank generated invalid move" });
         }
 
-        // Apply the AI move
-        console.log("🤖 Applying AI move...");
+        // Apply the Hank move
+        console.log("🤖 Applying Hank move...");
         console.log("🤖 Board before move:", {
           pieces: gameState.board.flatMap((row, r) => 
             row.map((piece, c) => piece ? `${piece.player}-${piece.type}@${r},${c}` : null)
           ).filter(Boolean)
         });
-        console.log("🤖 AI move details:", {
+        console.log("🤖 Hank move details:", {
           from: aiMove.from,
           to: aiMove.to,
           capturedPieces: aiMove.capturedPieces,
@@ -423,7 +423,7 @@ export const gamesRouter = createTRPCRouter({
             row.map((piece, c) => piece ? `${piece.player}-${piece.type}@${r},${c}` : null)
           ).filter(Boolean)
         });
-        console.log("🤖 AI move applied, new state:", {
+        console.log("🤖 Hank move applied, new state:", {
           currentPlayer: newGameState.currentPlayer,
           status: newGameState.status,
           winner: newGameState.winner
@@ -439,10 +439,10 @@ export const gamesRouter = createTRPCRouter({
 
         const nextMoveNumber = (moveCount[0]?.count ?? 0) + 1;
 
-        // Save the AI move
+        // Save the Hank move
         await tx.insert(gameMoves).values({
           gameId: input.gameId,
-          playerId: game[0].player1Id, // Use player1Id but mark it as AI move somehow
+          playerId: game[0].player1Id, // Use player1Id but mark it as Hank move somehow
           moveNumber: nextMoveNumber,
           fromRow: aiMove.from.row,
           fromCol: aiMove.from.col,
@@ -453,14 +453,14 @@ export const gamesRouter = createTRPCRouter({
         });
 
         // Update the game state with proper currentTurn logic for single-player
-        const humanIsRed = aiPlayer === 'black';  // Human plays red if AI plays black
+        const humanIsRed = aiPlayer === 'black';  // Human plays red if Hank plays black
         const nextPlayerIsHuman = newGameState.currentPlayer === (humanIsRed ? 'red' : 'black');
         
         const [updatedGame] = await tx
           .update(games)
           .set({
             boardState: serializeGameState(newGameState),
-            currentTurn: nextPlayerIsHuman ? game[0].player1Id : null, // Human player ID or null for AI
+            currentTurn: nextPlayerIsHuman ? game[0].player1Id : null, // Human player ID or null for Hank
             status: newGameState.status === 'finished' ? 'finished' : 'in_progress',
             winnerId: newGameState.winner === 'red' ? game[0].player1Id : 
                      newGameState.winner === 'black' ? (aiPlayer === 'black' ? null : game[0].player1Id) : null,
