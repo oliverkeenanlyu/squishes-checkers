@@ -166,7 +166,7 @@ export default function LobbyPage() {
       <ToastContainer />
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-wrap justify-center sm:justify-between items-center mb-8 gap-4">
           <div className="flex items-center space-x-4">
             <Link
               href="/"
@@ -182,11 +182,11 @@ export default function LobbyPage() {
               <p className="text-gray-600 mt-1">Choose your game mode and start playing!</p>
             </div>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-2 justify-center space-x-0">
             <button
               onClick={handleCreateGame}
               disabled={isCreatingGame}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+              className="px-6 w-full sm:w-auto py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
             >
               {isCreatingGame ? "Creating..." : "Create Multiplayer Game"}
             </button>
@@ -195,16 +195,17 @@ export default function LobbyPage() {
                 setShowInviteInput(!showInviteInput);
                 setShowSinglePlayerOptions(false); // Close other option
               }}
-              className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              className="px-6 w-full sm:w-auto py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
             >
               Join by Invite
             </button>
             <button
+          
               onClick={() => {
                 setShowSinglePlayerOptions(!showSinglePlayerOptions);
                 setShowInviteInput(false); // Close other option
               }}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              className="px-6 w-full sm:w-auto py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
               Play vs Hank 🐦
             </button>

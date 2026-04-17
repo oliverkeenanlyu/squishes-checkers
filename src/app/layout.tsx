@@ -7,7 +7,7 @@ import { SessionProvider } from "next-auth/react";
 import { TRPCReactProvider } from "@/trpc/react";
 
 export const metadata: Metadata = {
-  title: "Squisher's Checkers",
+  title: "Squishes Checkers",
   description: "A way to play checkers without stupid ads.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

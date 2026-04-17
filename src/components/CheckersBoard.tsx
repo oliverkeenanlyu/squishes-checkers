@@ -314,8 +314,8 @@ export function CheckersBoard({
       {/* Board */}
       <div className="relative">
         <div 
-          className="grid grid-cols-8 grid-rows-8 gap-0 border-4 border-amber-800 rounded-lg overflow-hidden shadow-2xl bg-amber-200 "
-          style={{ width: '512px', height: '512px' }}
+          className="w-auto h-auto xs:w-[300px] xs:h-[300px] sm:w-[512px] sm:h-[512px] grid grid-cols-8 grid-rows-8 gap-0 border-4 border-amber-800 rounded-lg overflow-hidden shadow-2xl bg-amber-200 "
+          // style={{ width: '512px', height: '512px' }}
         >
           {renderBoard()}
         </div>

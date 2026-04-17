@@ -540,14 +540,14 @@ export default function GamePage() {
       <ToastContainer />
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-wrap justify-center gap-4 sm:justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               Checkers Game
             </h1>
             <p className="text-gray-600 mt-1">Game ID: {gameId}</p>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2 space-x-0">
             {data.status === 'waiting_for_player' && data.isPrivate && data.inviteCode && (
               <>
                 <button
@@ -796,9 +796,9 @@ export default function GamePage() {
         {/* Game Board */}
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           <div className="xl:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg p-20">
+            <div className="bg-white rounded-lg shadow-lg p-10 sm:p-20">
               {gameState && gameStarted ? (
-                <div className="flex justify-center">
+                <div className="flex justify-center p-0">
                   <CheckersBoard
                     key={`${gameId}-${data.lastMoveAt?.getTime() || 0}`} // Force re-render on moves
                     gameState={gameState}

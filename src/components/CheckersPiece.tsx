@@ -68,7 +68,7 @@ export function CheckersPiece({
       {piece && (
         <div
           className={`
-            w-10 h-10 rounded-full shadow-lg border-2 transition-all duration-300 ease-in-out checkers-piece
+           w-5 h-5 sm:w-10 sm:h-10 rounded-full shadow-lg border-2 transition-all duration-300 ease-in-out checkers-piece
             ${piece.player === 'red' 
               ? 'bg-red-600 border-red-800 shadow-red-900/50' 
               : 'bg-gray-800 border-gray-900 shadow-gray-900/50'
